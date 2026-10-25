@@ -1,4 +1,5 @@
 import localFont from 'next/font/local';
+import { Analytics } from '@vercel/analytics/next';
 import { IBM_Plex_Sans, Noto_Serif_Bengali } from 'next/font/google';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
