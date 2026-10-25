@@ -77,6 +77,7 @@ export default async function RootLayout({ children }) {
         <Header />
         <main id="main">{children}</main>
         <Footer settings={settings} />
+                <Analytics />
       </body>
     </html>
   );
