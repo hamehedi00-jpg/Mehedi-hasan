@@ -1,0 +1,23 @@
+{
+  "name": "mehedi-hasan",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.57.4",
+    "github-slugger": "2.0.0",
+    "next": "~15.5.7",
+    "react": "~19.1.2",
+    "react-dom": "~19.1.2",
+    "react-markdown": "10.1.0",
+    "rehype-slug": "6.0.0",
+    "remark-gfm": "4.0.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
