@@ -340,6 +340,26 @@ function Editor({ supabase, initial, onClose }) {
     });
   };
 
+  const emailSubscribers = async () => {
+    if (!window.confirm(`Email "${post.title}" to all subscribers now? This cannot be undone.`)) return;
+    setBusy(true);
+    setNote({ tone: '', text: 'Sending' });
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    const res = await fetch('/api/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ slug: post.slug }),
+    }).catch(() => null);
+    const body = res ? await res.json().catch(() => ({})) : {};
+    setBusy(false);
+    if (!res || !res.ok) {
+      return setNote({ tone: 'bad', text: body.error || 'Could not send. Try again in a minute.' });
+    }
+    setPost((p) => ({ ...p, notified_at: new Date().toISOString() }));
+    setNote({ tone: 'good', text: 'Sent. Subscribers will get the email within a few minutes.' });
+  };
+
   const remove = async () => {
     if (!post.id) return onClose();
     if (!window.confirm(`Delete "${post.title}"? This cannot be undone.`)) return;
@@ -362,6 +382,17 @@ function Editor({ supabase, initial, onClose }) {
           <Link className="btn btn--ghost btn--small" href={`/writing/${post.slug}`} target="_blank">
             View post
           </Link>
+        ) : null}
+        {post.status === 'published' && post.id ? (
+          <button
+            className="btn btn--ghost btn--small"
+            type="button"
+            disabled={busy || Boolean(post.notified_at)}
+            onClick={emailSubscribers}
+            title={post.notified_at ? 'This post has already been emailed' : 'Send this post to all subscribers'}
+          >
+            {post.notified_at ? 'Emailed' : 'Email subscribers'}
+          </button>
         ) : null}
         <button className="btn btn--ghost btn--small" type="button" disabled={busy} onClick={() => save('draft')}>
           {post.status === 'published' ? 'Unpublish' : 'Save draft'}
@@ -564,7 +595,11 @@ function Numbers({ supabase }) {
     const without = clean.filter((r) => !r.id);
     const r1 = withId.length ? await supabase.from('indicators').upsert(withId) : { error: null };
     const r2 = without.length ? await supabase.from('indicators').insert(without) : { error: null };
-    const r3 = await supabase.from('settings').upsert({ key: 'indicators_as_of', value: asOf });
+    const r3 = await supabase.from('settings').upsert([
+      { key: 'indicators_as_of', value: asOf },
+      // The home page hides the table if this date is more than two weeks old.
+      { key: 'indicators_updated_at', value: new Date().toISOString() },
+    ]);
     const err = r1.error || r2.error || r3.error;
     if (err) return setNote({ tone: 'bad', text: `Save failed: ${err.message}` });
     const { data } = await supabase.from('indicators').select('*').order('sort');
