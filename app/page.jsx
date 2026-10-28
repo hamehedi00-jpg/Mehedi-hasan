@@ -27,6 +27,12 @@ export default async function Home() {
   const lead = posts[0];
   const asOf = settings.indicators_as_of;
 
+  // A stale table hurts credibility more than no table, so hide the numbers
+  // when they were last saved more than two weeks ago.
+  const MAX_AGE_DAYS = 14;
+  const savedAt = Date.parse(settings.indicators_updated_at || '') || Math.max(0, ...indicators.map((f) => Date.parse(f.updated_at) || 0));
+  const fresh = savedAt > 0 && Date.now() - savedAt < MAX_AGE_DAYS * 86400000;
+
   return (
     <div className="wrap">
       <section className="opening" aria-labelledby="opening-title">
@@ -48,7 +54,7 @@ export default async function Home() {
           </div>
         </div>
 
-        {indicators.length ? (
+        {indicators.length && fresh ? (
           <aside className="ledger" aria-labelledby="ledger-title">
             <div className="ledger__head">
               <h2 id="ledger-title">The numbers I am watching</h2>
