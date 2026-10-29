@@ -1,5 +1,6 @@
 import localFont from 'next/font/local';
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { IBM_Plex_Sans, Noto_Serif_Bengali } from 'next/font/google';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -78,6 +79,7 @@ export default async function RootLayout({ children }) {
         <main id="main">{children}</main>
         <Footer settings={settings} />
                 <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
